@@ -10,15 +10,16 @@ ctx.fillRect(0, 0, canvas.width, canvas.height);
 const gravity = 0.7;
 
 class Sprite {
-    constructor({ position, velocity }) {
+    constructor({ position, velocity, color }) {
         this.position = position;
         this.velocity = velocity;
         this.height = 150;
         this.width = 100;
+        this.color = color;
     }
 
     draw() {
-        ctx.fillStyle = 'red';
+        ctx.fillStyle = this.color;
         ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
     }
 
@@ -26,6 +27,7 @@ class Sprite {
         this.draw();
         this.position.y += this.velocity.y;
         this.position.x += this.velocity.x;
+
         if (this.position.y + this.height >= canvas.height) {
             this.velocity.y = 0;
             this.position.y = canvas.height - this.height;
@@ -57,7 +59,8 @@ const player = new Sprite({
     velocity: {
         x: 0,
         y: 0
-    }
+    },
+    color: 'lightblue'
 })
 
 const enemy = new Sprite({
@@ -68,8 +71,23 @@ const enemy = new Sprite({
     velocity: {
         x: 0,
         y: 0
-    }
+    },
+    color: 'violet'
 })
+
+const keys = {
+    a: {
+        pressed: false,
+    },
+    d: {
+        pressed: false,
+    },
+    w: {
+        pressed: false,
+    }
+}
+
+let lastKey;
 
 function animate() {
     window.requestAnimationFrame(animate);
@@ -77,40 +95,54 @@ function animate() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     player.update();
     enemy.update();
+
+    player.velocity.x = 0;
+    
+    if(keys.a.pressed && lastKey === 'a') {
+        player.velocity.x -= 5;
+    }
+
+    if(keys.d.pressed && lastKey === 'd') {
+        player.velocity.x += 5;
+    }
+
+    if(keys.w.pressed && lastKey === 'w') {
+        player.velocity.y -= 1.5;
+    }
 }
 
 
 animate();
 
 window.addEventListener('keydown', (e) => {
-    console.log(e.key)
     switch (e.key) {
-        case 'ArrowUp':
-            player.velocity.y = -10;
-            break;
-        case 'ArrowDown':
-            player.velocity.y = 10;
-            break;
-        case 'ArrowLeft':
-            player.velocity.x = -10;
-            break;
-        case 'ArrowRight':
-            player.velocity.x = 10;
-            break;
         case 'w':
-            player.velocity.y = -10;
-            break;
-        case 's':
-            player.velocity.y = 10;
+            keys.w.pressed = true;
+            lastKey = 'w';
             break;
         case 'a':
-            player.velocity.x = -10;
+            keys.a.pressed = true;
+            lastKey = 'a';
             break;
         case 'd':
-            player.velocity.x = 10;
+            keys.d.pressed = true;
+            lastKey = 'd';
             break;
 
     }
 })
 
-console.log(player);
+window.addEventListener('keyup', (e) => {
+    switch (e.key) {
+        case 'w':
+            keys.w.pressed = false;
+            break;
+        case 'a':
+            keys.a.pressed = false;
+            break;
+        case 'd':
+            keys.d.pressed = false;
+            break;
+
+    }
+})
