@@ -17,11 +17,21 @@ class Sprite {
         this.width = 100;
         this.color = color;
         this.lastKey;
+        this.isAttacking;
+        this.attackBox = {
+            position: this.position,
+            width: this.width + 80,
+            height: this.height - 100,
+        }
     }
 
     draw() {
         ctx.fillStyle = this.color;
         ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
+
+        // Attackbox
+        ctx.fillStyle = 'yellow';
+        ctx.fillRect(this.attackBox.position.x, this.attackBox.position.y, this.attackBox.width, this.attackBox.height);
     }
 
     update() {
@@ -47,6 +57,13 @@ class Sprite {
             this.velocity.x = 0;
             this.position.x = 0;
         }
+    }
+
+    attack() {
+        this.isAttacking = true;
+        setTimeout(() => {
+            this.isAttacking = false;
+        }, 500);
     }
 }
 
@@ -136,6 +153,15 @@ function animate() {
     if(keys.ArrowUp.pressed && enemy.lastKey === 'ArrowUp') {
         enemy.velocity.y -= 1.5;
     }
+
+
+    // Player attack detect
+    if(player.attackBox.position.x + player.attackBox.width >= enemy.position.x && 
+        player.attackBox.position.x <= enemy.position.x + enemy.attackBox.width && 
+        player.attackBox.position.y + player.attackBox.height >= enemy.position.y && 
+        player.attackBox.position.y <= enemy.position.y + enemy.attackBox.height && player.isAttacking) {
+        console.log('hit');
+    }
 }
 
 
@@ -157,6 +183,9 @@ window.addEventListener('keydown', (e) => {
         case 'd':
             keys.d.pressed = true;
             player.lastKey = 'd';
+            break;
+        case ' ':
+            player.attack()
             break;
 
         /* Enemy movement*/
@@ -186,6 +215,9 @@ window.addEventListener('keyup', (e) => {
             break;
         case 'd':
             keys.d.pressed = false;
+            break;
+        case ' ':
+            player.isAttacking = false;
             break;
 
         /* Enemy movement */
