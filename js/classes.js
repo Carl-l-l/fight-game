@@ -1,21 +1,42 @@
 class Sprite {
-    constructor({ position }) {
+    constructor({ position, imageSrc, width, height, scale = 1, framesMax = 1 }) {
         this.position = position;
-        this.height = 150;
-        this.width = 100;
+        this.height = width;
+        this.width = height;
+        this.image = new Image();
+        this.image.src = imageSrc;
+        this.scale = scale;
+        this.framesMax = framesMax;
+        this.framesCurrent = 0;
+        this.framesElapsed = 0;
+        this.framesHold = 8;
     }
 
-    draw() {}
+    draw() {
+        ctx.drawImage(
+            this.image,
+            this.framesCurrent * (this.image.width / this.framesMax),
+            0,
+            this.image.width / this.framesMax,
+            this.image.height,
+            this.position.x,
+            this.position.y,
+            (this.image.width / this.framesMax) * this.scale,
+            this.image.height * this.scale
+        );
+    }
 
     update() {
         this.draw();
-    }
+        this.framesElapsed++;
 
-    attack() {
-        this.isAttacking = true;
-        setTimeout(() => {
-            this.isAttacking = false;
-        }, 500);
+        if (this.framesElapsed % this.framesHold === 0) {
+            if (this.framesCurrent < this.framesMax - 1) {
+                this.framesCurrent++;
+            } else {
+                this.framesCurrent = 0;
+            }
+        }
     }
 }
 
@@ -45,7 +66,7 @@ class Fighter {
         ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
 
         // Attackbox
-        if(this.isAttacking) {
+        if (this.isAttacking) {
             ctx.fillStyle = 'yellow';
             ctx.fillRect(this.attackBox.position.x, this.attackBox.position.y, this.attackBox.width, this.attackBox.height);
         }
@@ -63,7 +84,7 @@ class Fighter {
         if (this.position.y + this.height >= canvas.height) {
             this.velocity.y = 0;
             this.position.y = canvas.height - this.height;
-        } else if(this.position.y <= 0) {
+        } else if (this.position.y <= 0) {
             this.velocity.y = 0;
             this.position.y = 1;
         }
@@ -74,7 +95,7 @@ class Fighter {
         if (this.position.x + this.width >= canvas.width) {
             this.velocity.x = 0;
             this.position.x = canvas.width - this.width;
-        } else if(this.position.x <= 0) {
+        } else if (this.position.x <= 0) {
             this.velocity.x = 0;
             this.position.x = 0;
         }
