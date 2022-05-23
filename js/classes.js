@@ -40,12 +40,13 @@ class Sprite {
     }
 }
 
-class Fighter {
-    constructor({ position, velocity, color, offset }) {
-        this.position = position;
+class Fighter extends Sprite {
+    constructor({ position, velocity, color, offset, imageSrc, scale = 1, framesMax = 1, sprites }) 
+    {
+        super({ position, imageSrc, scale, framesMax });
         this.velocity = velocity;
         this.height = 150;
-        this.width = 100;
+        this.width = 50;
         this.color = color;
         this.lastKey;
         this.health = 100;
@@ -59,21 +60,34 @@ class Fighter {
             width: this.width + 80,
             height: this.height - 100,
         };
-    }
+        this.framesElapsed = 0;
+        this.framesCurrent = 0;
+        this.framesHold = 10;
+        this.framesMax = 6;
+        this.sprites = sprites;
 
-    draw() {
-        ctx.fillStyle = this.color;
-        ctx.fillRect(this.position.x, this.position.y, this.width, this.height);
 
-        // Attackbox
-        if (this.isAttacking) {
-            ctx.fillStyle = 'yellow';
-            ctx.fillRect(this.attackBox.position.x, this.attackBox.position.y, this.attackBox.width, this.attackBox.height);
+        for(const sprite in this.sprites){
+            this.sprites[sprite].image = new Image();
+            this.sprites[sprite].image.src = this.sprites[sprite].imageSrc;
         }
+
+        console.log(this.sprites)
     }
 
     update() {
         this.draw();
+
+        this.image.height = 75;
+
+        this.framesElapsed++;
+        if(this.framesElapsed % this.framesHold === 0) {
+            if(this.framesCurrent < this.framesMax - 1) {
+                this.framesCurrent++;
+            } else {
+                this.framesCurrent = 0;
+            }
+        }
 
         this.attackBox.position.x = this.position.x + this.attackBox.offset.x;
         this.attackBox.position.y = this.position.y + this.attackBox.offset.y;
@@ -81,14 +95,13 @@ class Fighter {
         this.position.y += this.velocity.y;
         this.position.x += this.velocity.x;
 
-        if (this.position.y + this.height >= canvas.height) {
+        if (this.position.y + this.height >= canvas.height - 85) {
             this.velocity.y = 0;
-            this.position.y = canvas.height - this.height;
+            this.position.y = canvas.height - 85 - this.height;
         } else if (this.position.y <= 0) {
             this.velocity.y = 0;
             this.position.y = 1;
-        }
-        else {
+        } else {
             this.velocity.y += gravity;
         }
 
@@ -106,5 +119,34 @@ class Fighter {
         setTimeout(() => {
             this.isAttacking = false;
         }, 500);
+    }
+
+    switchSprites(sprite) {
+        // if(this.image === this.sprites.idle.image && this.framesCurrent < this.sprites.idle.framesMax - 1) {
+        //     return;
+        // }
+
+        switch (sprite) {
+            case 'idle':
+                this.image = this.sprites.idle.image;
+                this.framesMax = this.sprites.idle.framesMax;
+                break;
+            case 'run':
+                this.image = this.sprites.run.image;
+                this.framesMax = this.sprites.run.framesMax;
+                break;
+            case 'jump':
+                this.image = this.sprites.jump.image;
+                this.framesMax = this.sprites.jump.framesMax;
+                this.framesCurrent = 0;
+                break;
+            case 'fall':
+                this.image = this.sprites.fall.image;
+                this.framesMax = this.sprites.fall.framesMax;
+                break;
+            default:
+                break;
+        }
+        
     }
 }

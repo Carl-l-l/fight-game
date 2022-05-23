@@ -6,7 +6,7 @@ const enemyHealth = document.querySelector('#enemyHealth');
 const playerHealth = document.querySelector('#playerHealth');
 
 canvas.width = 1024;
-canvas.height = 768;
+canvas.height = 576;
 
 ctx.fillRect(0, 0, canvas.width, canvas.height);
 
@@ -50,7 +50,26 @@ const player = new Fighter({
     offset: {
         x: 0,
         y: 0
-    }
+    },
+    scale: 2.5,
+    sprites: {
+        idle: {
+            imageSrc: "./assets/character/char_blue_idle.png",
+            framesMax: 6,
+        },
+        run: {
+            imageSrc: "./assets/character/char_blue_running.png",
+            framesMax: 8,
+        },
+        jump: {
+            imageSrc: "./assets/character/char_blue_jumping.png",
+            framesMax: 4,
+        },
+        fall: {
+            imageSrc: "./assets/character/char_blue_falling.png",
+            framesMax: 4,
+        }
+    },
 })
 
 const enemy = new Fighter({
@@ -66,6 +85,13 @@ const enemy = new Fighter({
     offset: {
         x: -50,
         y: 0
+    },
+    scale: 2.5,
+    sprites: {
+        idle: {
+            imageSrc: "./assets/character/enemy_red_idle.png",
+            framesMax: 6,
+        }
     }
 })
 
@@ -102,6 +128,7 @@ window.addEventListener('keydown', (e) => {
 
         /* Player movement */
         case 'w':
+            player.velocity.y = -20;
             keys.w.pressed = true;
             player.lastKey = 'w';
             break;
