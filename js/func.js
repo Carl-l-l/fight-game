@@ -29,18 +29,24 @@ function determineWinner({ player, enemy }) {
         if (player.health === enemy.health) {
             displayTxt.style.display = 'flex';
         }
-    } else if (player.health >= enemy.health || enemy.health === 0) {
-        displayTxt.innerHTML = "Player 1 Wins";
-        displayTxt.style.display = 'flex';
+    } 
+    
+    if (player.health >= enemy.health || enemy.health === 0) {
+        enemy.death();
+        displayTxt.innerHTML += "Player 1 Wins";
+        addPoints('player1');
+        
     } else if (player.health <= enemy.health || player.health === 0) {
-        displayTxt.innerHTML = "Player 2 Wins";
-        displayTxt.style.display = 'flex';
+        player.death();
+        displayTxt.innerHTML += "Player 2 Wins";
+        addPoints('player2');
     }
+
 }
 
 
 function animate() {
-    window.requestAnimationFrame(animate);
+    animation = window.requestAnimationFrame(animate);
     ctx.fillStyle = 'black';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     background.update();
@@ -61,10 +67,6 @@ function animate() {
         player.switchSprites('run');
         player.velocity.x += 5;
     }
-    // if (keys.w.pressed && player.lastKey === 'w') {
-    //     player.switchSprites('jump')
-    //     player.velocity.y -= 1.5;
-    // }
     if (player.velocity.y < 0) {
         player.switchSprites('jump');
     } else if(player.velocity.y > 0) {
@@ -77,26 +79,34 @@ function animate() {
     enemy.switchSprites('idle');
 
     if (keys.ArrowLeft.pressed && enemy.lastKey === 'ArrowLeft') {
+        enemy.switchSprites('run');
         enemy.velocity.x -= 5;
     }
     if (keys.ArrowRight.pressed && enemy.lastKey === 'ArrowRight') {
+        enemy.switchSprites('run');
         enemy.velocity.x += 5;
     }
-    if (keys.ArrowUp.pressed && enemy.lastKey === 'ArrowUp') {
-        enemy.velocity.y -= 1.5;
+    // if(enemy.isAttacking) {
+    //     console.log('enemy attack');
+    //     enemy.switchSprites('attack');
+    // }
+    if (enemy.velocity.y < 0) {
+        enemy.switchSprites('jump');
+    } else if(enemy.velocity.y > 0) {
+        enemy.switchSprites('fall');
     }
 
 
 
     if (rectangularCollision({ rect1: player, rect2: enemy }) && player.isAttacking) {
-        player.isAttacking = true;
+        // player.isAttacking = true;
         enemy.health -= 10;
         enemyHealth.style.width = enemy.health + '%';
         console.log('Player hit enemy' + enemy.health);
     }
 
     if (rectangularCollision({ rect1: enemy, rect2: player }) && enemy.isAttacking) {
-        enemy.isAttacking = true;
+        // enemy.isAttacking = true;
         player.health -= 10;
         playerHealth.style.width = player.health + '%';
         console.log('Enemy hit player: ' + player.health);
@@ -104,6 +114,26 @@ function animate() {
 
     if (player.health <= 0 || enemy.health <= 0 || timer <= 0) {
         displayTxt.style.display = 'flex';
+        displayTxt.innerHTML = gameover;
         determineWinner({ player, enemy });
+
     }
+}
+
+function getPoints() {
+    localStorage.getItem('points') ? points = JSON.parse(localStorage.getItem('points')) : points = {'player1': 0, 'player2': 0};
+    return points;
+}
+
+function addPoints(winner) {
+    localStorage.getItem('points') ? points = JSON.parse(localStorage.getItem('points')) : points = {'player1': 0, 'player2': 0};
+
+    if (winner === 'player1') {
+        points.player1 += 1;
+    }
+    if (winner === 'player2') {
+        points.player2 += 1;
+    }
+    localStorage.setItem('points', JSON.stringify(points));
+
 }

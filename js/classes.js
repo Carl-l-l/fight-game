@@ -41,8 +41,7 @@ class Sprite {
 }
 
 class Fighter extends Sprite {
-    constructor({ position, velocity, color, offset, imageSrc, scale = 1, framesMax = 1, sprites }) 
-    {
+    constructor({ position, velocity, color, offset, imageSrc, scale = 1, framesMax = 1, sprites }) {
         super({ position, imageSrc, scale, framesMax });
         this.velocity = velocity;
         this.height = 150;
@@ -51,6 +50,7 @@ class Fighter extends Sprite {
         this.lastKey;
         this.health = 100;
         this.isAttacking;
+        this.isDead = false;
         this.attackBox = {
             position: {
                 x: this.position.x,
@@ -62,12 +62,12 @@ class Fighter extends Sprite {
         };
         this.framesElapsed = 0;
         this.framesCurrent = 0;
-        this.framesHold = 10;
+        this.framesHold = 8;
         this.framesMax = 6;
         this.sprites = sprites;
 
 
-        for(const sprite in this.sprites){
+        for (const sprite in this.sprites) {
             this.sprites[sprite].image = new Image();
             this.sprites[sprite].image.src = this.sprites[sprite].imageSrc;
         }
@@ -78,11 +78,11 @@ class Fighter extends Sprite {
     update() {
         this.draw();
 
-        this.image.height = 75;
+        this.image.height = 200;
 
         this.framesElapsed++;
-        if(this.framesElapsed % this.framesHold === 0) {
-            if(this.framesCurrent < this.framesMax - 1) {
+        if (this.framesElapsed % this.framesHold === 0) {
+            if (this.framesCurrent < this.framesMax - 1) {
                 this.framesCurrent++;
             } else {
                 this.framesCurrent = 0;
@@ -95,9 +95,9 @@ class Fighter extends Sprite {
         this.position.y += this.velocity.y;
         this.position.x += this.velocity.x;
 
-        if (this.position.y + this.height >= canvas.height - 85) {
+        if (this.position.y + this.height >= canvas.height - this.image.height) {
             this.velocity.y = 0;
-            this.position.y = canvas.height - 85 - this.height;
+            this.position.y = canvas.height - this.image.height - this.height;
         } else if (this.position.y <= 0) {
             this.velocity.y = 0;
             this.position.y = 1;
@@ -115,16 +115,40 @@ class Fighter extends Sprite {
     }
 
     attack() {
+        this.framesHold = 5;
+        this.switchSprites('attack');
         this.isAttacking = true;
         setTimeout(() => {
             this.isAttacking = false;
+            this.framesHold = 10;
         }, 500);
+
+    }
+
+    death() {
+        this.framesHold = 20;
+        if(this.isDead === false){
+            this.isDead = true;
+            this.switchSprites('dead');
+        } else {
+            return;
+        }
     }
 
     switchSprites(sprite) {
-        // if(this.image === this.sprites.idle.image && this.framesCurrent < this.sprites.idle.framesMax - 1) {
-        //     return;
-        // }
+        if (this.image === this.sprites.attack.image && this.framesCurrent < this.sprites.attack.framesMax - 1) {
+            return;
+        }
+        if (this.image === this.sprites.dead.image) {
+            if (this.framesCurrent === this.sprites.dead.framesMax - 1){
+                this.isDead = true;
+                window.cancelAnimationFrame(animation);
+
+            } 
+                
+            return;
+        }
+
 
         switch (sprite) {
             case 'idle':
@@ -144,9 +168,19 @@ class Fighter extends Sprite {
                 this.image = this.sprites.fall.image;
                 this.framesMax = this.sprites.fall.framesMax;
                 break;
+            case 'attack':
+                this.image = this.sprites.attack.image;
+                this.framesMax = this.sprites.attack.framesMax;
+                this.framesCurrent = 0;
+                break;
+            case 'dead':
+                this.image = this.sprites.dead.image;
+                this.framesMax = this.sprites.dead.framesMax;
+                this.framesCurrent = 0;
+                break;
             default:
                 break;
         }
-        
+
     }
 }

@@ -15,6 +15,7 @@ let gameover = '<h1>Game Over</h1><br>' + '<button onclick="location.reload()">R
 let timer = 100;
 timerP.innerHTML = timer;
 
+let points = getPoints();
 
 
 const gravity = 0.7;
@@ -51,23 +52,51 @@ const player = new Fighter({
         x: 0,
         y: 0
     },
-    scale: 2.5,
+    scale: 2,
     sprites: {
+        // idle: {
+        //     imageSrc: "./assets/character/char_blue_idle.png",
+        //     framesMax: 6,
+        // },
+        // run: {
+        //     imageSrc: "./assets/character/char_blue_running.png",
+        //     framesMax: 8,
+        // },
+        // jump: {
+        //     imageSrc: "./assets/character/char_blue_jumping.png",
+        //     framesMax: 4,
+        // },
+        // fall: {
+        //     imageSrc: "./assets/character/char_blue_falling.png",
+        //     framesMax: 4,
+        // },
+        // attack: {
+        //     imageSrc: "./assets/character/char_blue_atk.png",
+        //     framesMax: 6,
+        // }
         idle: {
-            imageSrc: "./assets/character/char_blue_idle.png",
-            framesMax: 6,
+            imageSrc: "./assets/character/Mac/Idle.png",
+            framesMax: 8,
         },
         run: {
-            imageSrc: "./assets/character/char_blue_running.png",
+            imageSrc: "./assets/character/Mac/Run.png",
             framesMax: 8,
         },
         jump: {
-            imageSrc: "./assets/character/char_blue_jumping.png",
-            framesMax: 4,
+            imageSrc: "./assets/character/Mac/Jump.png",
+            framesMax: 2,
         },
         fall: {
-            imageSrc: "./assets/character/char_blue_falling.png",
-            framesMax: 4,
+            imageSrc: "./assets/character/Mac/Fall.png",
+            framesMax: 2,
+        },
+        attack: {
+            imageSrc: "./assets/character/Mac/Attack1.png",
+            framesMax: 6,
+        },
+        dead: {
+            imageSrc: "./assets/character/Mac/Death.png",
+            framesMax: 6,
         }
     },
 })
@@ -86,11 +115,31 @@ const enemy = new Fighter({
         x: -50,
         y: 0
     },
-    scale: 2.5,
+    scale: 2,
     sprites: {
         idle: {
-            imageSrc: "./assets/character/enemy_red_idle.png",
-            framesMax: 6,
+            imageSrc: "./assets/character/kenji/Idle.png",
+            framesMax: 4,
+        },
+        run: {
+            imageSrc: "./assets/character/kenji/Run.png",
+            framesMax: 8,
+        },
+        jump: {
+            imageSrc: "./assets/character/kenji/jump.png",
+            framesMax: 2,
+        },
+        fall: {
+            imageSrc: "./assets/character/kenji/fall.png",
+            framesMax: 2,
+        },
+        attack: {
+            imageSrc: "./assets/character/kenji/Attack1.png",
+            framesMax: 4,
+        },
+        dead: {
+            imageSrc: "./assets/character/kenji/Death.png",
+            framesMax: 7,
         }
     }
 })
@@ -119,6 +168,7 @@ const keys = {
 
 
 decreaseTimer();
+var animation;
 animate();
 
 
@@ -141,7 +191,9 @@ window.addEventListener('keydown', (e) => {
             player.lastKey = 'd';
             break;
         case ' ':
-            player.attack()
+            if (player.isAttacking === false) {
+                player.attack()
+            }
             break;
 
         /* Enemy movement*/
@@ -154,10 +206,14 @@ window.addEventListener('keydown', (e) => {
             enemy.lastKey = 'ArrowRight';
             break;
         case 'ArrowUp':
+            enemy.velocity.y = -20;
             keys.ArrowUp.pressed = true;
             enemy.lastKey = 'ArrowUp';
             break;
         case 'ArrowDown':
+            if (enemy.isAttacking === false) {
+                enemy.attack()
+            }
             enemy.isAttacking = true;
             break;
     }
