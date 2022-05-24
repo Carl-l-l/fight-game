@@ -1,16 +1,19 @@
 function decreaseTimer() {
-    if (timer >= 0) {
-        if (timer == 0 || player.health <= 0 || enemy.health <= 0) {
-            determineWinner({ player, enemy });
-            timerP.innerHTML = 'TIME OUT!';
-            document.getElementById('displayText').style.display = 'flex';
-            document.getElementById('displayText').innerHTML = gameover;
+    if (timer > 0) {
+        if(player.health <= 0 || enemy.health <= 0) {
+              console.log('dead')
         } else {
             timer--;
             setTimeout(decreaseTimer, 1000);
             timerP.innerHTML = timer;
         }
-
+    } else {
+        player.isDead = true;
+        enemy.isDead = true;
+        timerP.innerHTML = 'TIME OUT!';
+        timerP.style.padding = '15px';
+        document.getElementById('displayText').style.display = 'flex';
+        document.getElementById('displayText').innerHTML = gameover;
     }
 }
 
@@ -24,26 +27,22 @@ function rectangularCollision({ rect1, rect2 }) {
 
 function determineWinner({ player, enemy }) {
     // End of game conditions
-    if (player.health <= 0 || enemy.health <= 0 || timer <= 0) {
-        // displayTxt.innerHTML = gameover;
-        if (player.health === enemy.health) {
-            displayTxt.style.display = 'flex';
-        }
-    } 
-    
+    displayTxt.style.display = 'flex';    
     if (player.health >= enemy.health || enemy.health === 0) {
         enemy.death();
-        displayTxt.innerHTML += "Player 1 Wins";
+        displayTxt.innerHTML += "<p>Player 1 Wins</p>";
         addPoints('player1');
         
     } else if (player.health <= enemy.health || player.health === 0) {
         player.death();
-        displayTxt.innerHTML += "Player 2 Wins";
+        displayTxt.innerHTML += "<p>Player 2 Wins</p>";
         addPoints('player2');
     }
 
-}
+    points = getPoints()
+    pointCounter.innerHTML = points.player1 + ' : ' + points.player2;
 
+}
 
 function animate() {
     animation = window.requestAnimationFrame(animate);
@@ -86,10 +85,6 @@ function animate() {
         enemy.switchSprites('run');
         enemy.velocity.x += 5;
     }
-    // if(enemy.isAttacking) {
-    //     console.log('enemy attack');
-    //     enemy.switchSprites('attack');
-    // }
     if (enemy.velocity.y < 0) {
         enemy.switchSprites('jump');
     } else if(enemy.velocity.y > 0) {
@@ -103,6 +98,9 @@ function animate() {
         enemy.health -= 10;
         enemyHealth.style.width = enemy.health + '%';
         console.log('Player hit enemy' + enemy.health);
+        if(enemy.isDead === false){
+            enemy.takeHit();
+        }
     }
 
     if (rectangularCollision({ rect1: enemy, rect2: player }) && enemy.isAttacking) {
@@ -110,24 +108,27 @@ function animate() {
         player.health -= 10;
         playerHealth.style.width = player.health + '%';
         console.log('Enemy hit player: ' + player.health);
+        if(player.isDead === false){
+            player.takeHit();
+        }
     }
 
-    if (player.health <= 0 || enemy.health <= 0 || timer <= 0) {
-        displayTxt.style.display = 'flex';
-        displayTxt.innerHTML = gameover;
-        determineWinner({ player, enemy });
-
+    if (player.health <= 0 || enemy.health <= 0) {
+        if(player.isDead === false && enemy.isDead === false) {
+            displayTxt.style.display = 'flex';
+            displayTxt.innerHTML = gameover;
+            determineWinner({ player, enemy });
+        }
     }
 }
 
 function getPoints() {
+    let points;
     localStorage.getItem('points') ? points = JSON.parse(localStorage.getItem('points')) : points = {'player1': 0, 'player2': 0};
     return points;
 }
 
 function addPoints(winner) {
-    localStorage.getItem('points') ? points = JSON.parse(localStorage.getItem('points')) : points = {'player1': 0, 'player2': 0};
-
     if (winner === 'player1') {
         points.player1 += 1;
     }

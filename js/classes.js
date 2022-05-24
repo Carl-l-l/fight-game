@@ -57,7 +57,7 @@ class Fighter extends Sprite {
                 y: this.position.y
             },
             offset: offset,
-            width: this.width + 80,
+            width: this.width + 100,
             height: this.height - 100,
         };
         this.framesElapsed = 0;
@@ -85,7 +85,9 @@ class Fighter extends Sprite {
             if (this.framesCurrent < this.framesMax - 1) {
                 this.framesCurrent++;
             } else {
-                this.framesCurrent = 0;
+                if (this.isDead === false) {
+                    this.framesCurrent = 0;
+                }
             }
         }
 
@@ -121,13 +123,21 @@ class Fighter extends Sprite {
         setTimeout(() => {
             this.isAttacking = false;
             this.framesHold = 10;
-        }, 500);
+        }, 5000);
 
+    }
+
+    takeHit() {
+        this.framesHold = 50;
+        this.switchSprites('takeHit');
+        setTimeout(() => {
+            this.framesHold = 10;
+        }, 5000)
     }
 
     death() {
         this.framesHold = 20;
-        if(this.isDead === false){
+        if (this.isDead === false) {
             this.isDead = true;
             this.switchSprites('dead');
         } else {
@@ -140,12 +150,12 @@ class Fighter extends Sprite {
             return;
         }
         if (this.image === this.sprites.dead.image) {
-            if (this.framesCurrent === this.sprites.dead.framesMax - 1){
+            if (this.framesCurrent === this.sprites.dead.framesMax - 1) {
                 this.isDead = true;
-                window.cancelAnimationFrame(animation);
+                // window.cancelAnimationFrame(animation);
 
-            } 
-                
+            }
+
             return;
         }
 
@@ -177,6 +187,11 @@ class Fighter extends Sprite {
                 this.image = this.sprites.dead.image;
                 this.framesMax = this.sprites.dead.framesMax;
                 this.framesCurrent = 0;
+                break;
+            case 'takeHit':
+                this.image = this.sprites.takeHit.image;
+                this.framesMax = this.sprites.takeHit.framesMax;
+                // this.framesCurrent = 0;
                 break;
             default:
                 break;
